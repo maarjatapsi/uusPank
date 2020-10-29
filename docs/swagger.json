@@ -2,11 +2,11 @@
   "openapi": "3.0.1",
   "info": {
     "title": "M & O bank",
+    "version": "1.0.0",
     "description": "Bank api",
     "contact": {
       "email": "maarja.tapsi@khk.ee"
-    },
-    "version": "1.0.0"
+    }
   },
   "servers": [
     {
@@ -19,12 +19,6 @@
   "paths": {
     "/users": {
       "post": {
-        "tags": [
-          "users"
-        ],
-        "summary": "Create user",
-        "description": "Creates a new user",
-        "operationId": "createUser",
         "requestBody": {
           "description": "Created user object",
           "content": {
@@ -36,19 +30,21 @@
           },
           "required": true
         },
+        "tags": [
+          "users"
+        ],
         "responses": {
           "200": {
-            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserRegistered"
                 }
               }
-            }
+            },
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -58,14 +54,136 @@
                   "error": "Error description here"
                 }
               }
-            }
+            },
+            "description": "Bad request"
           }
-        }
+        },
+        "operationId": "createUser",
+        "summary": "Create user",
+        "description": "Creates a new user"
+      }
+    },
+    "/sessions": {
+      "post": {
+        "requestBody": {
+          "description": "User credentials used for log in",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "sessions"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Error description here"
+                }
+              }
+            },
+            "description": "Bad request"
+          }
+        },
+        "operationId": "login",
+        "summary": "Creates a user session (log in)"
+      },
+      "delete": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bodyType"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "sessions"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "tokenDeleted": {
+                    "value": {
+                      "message": "Token successfully deleted"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Session deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "security": [
+          {
+            "Authorize": []
+          }
+        ],
+        "summary": "Deletes a user session (log out)"
       }
     }
   },
   "components": {
     "schemas": {
+      "SessionRequest": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "username": "user1",
+          "password": "test"
+        }
+      },
+      "SessionResponse": {
+        "required": [
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "token": "5f9820e487dae20838fb4b13"
+        }
+      },
       "ErrorResponse": {
         "required": [
           "error"
@@ -101,7 +219,8 @@
           "_id",
           "name",
           "username",
-          "password"
+          "password",
+          "token"
         ],
         "type": "object",
         "properties": {
@@ -116,28 +235,47 @@
           },
           "password": {
             "type": "string"
+          },
+          "token": {
+            "type": "string"
           }
         },
         "example": {
           "user": {
             "_id": "23",
             "username": "user1",
-            "name": "Bob",
-            "password": "password"
+            "token": "9f8e22760d6a96881f9450ce4fb82e27",
+            "name": "Bob"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "name": "Authorization",
-        "type": "apiKey",
-        "in": "header"
+      },
+      "bodyType": {
+        "title": "Root Type for bodyType",
+        "description": "",
+        "type": "object",
+        "example": {}
       }
     },
     "responses": {
       "UnauthorizedError": {
+        "content": {
+          "application/json": {
+            "examples": {
+              "Unauthorized": {
+                "value": {
+                  "error": "Error description here"
+                }
+              }
+            }
+          }
+        },
         "description": "Access token is missing or invalid"
+      }
+    },
+    "securitySchemes": {
+      "Authorize": {
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   }
