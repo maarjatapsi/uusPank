@@ -147,6 +147,66 @@
         ],
         "summary": "Deletes a user session (log out)"
       }
+    },
+    "/users/account": {
+      "get": {
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          },
+          "required": false
+        },
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/userAccount"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "accountNotFound": {
+                    "value": {
+                      "error": "Account not found"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Account not found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "serverError": {
+                    "value": {
+                      "error": "Error description here"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Server Error"
+          }
+        },
+        "security": [
+          {
+            "Authorize": []
+          }
+        ],
+        "summary": "Shows users account info",
+        "description": "Gets users account info"
+      }
     }
   },
   "components": {
@@ -254,6 +314,48 @@
         "description": "",
         "type": "object",
         "example": {}
+      },
+      "userAccount": {
+        "title": "Root Type for userAccount",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "account": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "account_number": {
+                  "type": "string"
+                },
+                "balance": {
+                  "format": "int32",
+                  "type": "integer"
+                },
+                "currency": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "name": "string",
+          "username": "user1",
+          "account": [
+            {
+              "account_number": "EE2798567388301682",
+              "balance": 20000,
+              "currency": "EUR"
+            }
+          ]
+        }
       }
     },
     "responses": {

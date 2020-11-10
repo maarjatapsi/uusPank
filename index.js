@@ -39,6 +39,7 @@ app.get('/', (req, res) => {
 app.use('/users', usersRoute);
 app.use('/sessions', sessionsRoute);
 
+
 // Listening to the server
 app.listen(port, () => {
     console.log(`Server is listening ${port}`);
