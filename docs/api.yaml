@@ -8,8 +8,6 @@ info:
 servers:
   -
     url: 'http://localhost:3000'
-  -
-    url: 'http://petstore.swagger.io/v2'
 paths:
   /users:
     post:
@@ -191,6 +189,64 @@ paths:
       security:
         -
           Authorize: []
+  /transactions/b2b:
+    post:
+      tags:
+        - transactions
+      responses:
+        '200':
+          description: Succesfully received transaction
+        '400':
+          content:
+            application/json:
+              examples:
+                parsingJWTFailed:
+                  value:
+                    error: 'Parsing JWT payload failed: reason here'
+          description: Returns the errors specified
+        '404':
+          content:
+            application/json:
+              examples:
+                accountNotFound:
+                  value:
+                    error: Account not found
+          description: Account not found
+        '500':
+          content:
+            application/json:
+              examples:
+                cannotVerifySignature:
+                  value:
+                    error: 'Cannot verify your signature: The jwksUrl of your bank is missing'
+          description: "Cannot verify your signature: The jwksUrl of your bank is missing\r\n"
+        '502':
+          content:
+            application/json:
+              examples:
+                centralBankError:
+                  value:
+                    error: 'Central Bank error: reason here'
+          description: Central Bank error
+  /transactions/jwks:
+    get:
+      tags:
+        - transactions
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                keys:
+                  value:
+                    keys:
+                      -
+                        kty: RSA
+                        kid: uzDlPavO-uyJwXO5sHYA7sVeZ6dXHEYI2-AcHi2tTfA
+                        'n': >-
+                          Uw3RoZP869toe9VHfyIdjYue4n59mq3hxY7MjqLl3LjVZyPPDcTMlIxjE4NucYH7snTYVImLoERJgMX_YpT2SwmAhlS2LqrMysKW6QjYedirdYCK7zERWLxLVjCfZEcqQIY8rP1o3_-4FDHROOV_jnhNBRU2wtZZUtyQTTokV78
+                        e: AQAB
+          description: Responds with a JWKS key
 components:
   schemas:
     SessionRequest:

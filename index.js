@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
 const dotenv = require('dotenv');
-const { RequestHeadersHaveCorrectContentType, RequestBodyIsValidJson } = require('./middlewares')
+const { RequestHeadersHaveCorrectContentType, RequestBodyIsValidJson, processTransactions } = require('./middlewares')
 const yaml = require('yamljs');
 const swaggerDocument = yaml.load('./docs/api.yaml');
 
@@ -42,6 +42,7 @@ app.use('/users', usersRoute);
 app.use('/sessions', sessionsRoute);
 app.use('/transactions', transactionsRoute);
 
+processTransactions();
 // Listening to the server
 app.listen(port, () => {
     console.log(`Server is listening ${port}`);
