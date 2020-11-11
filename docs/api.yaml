@@ -16,7 +16,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/user'
         required: true
       tags:
         - users
@@ -25,13 +25,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserRegistered'
+                $ref: '#/components/schemas/userRegistered'
           description: Success
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/errorResponse'
               example:
                 error: Error description here
           description: Bad request
@@ -45,7 +45,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionRequest'
+              $ref: '#/components/schemas/sessionRequest'
         required: true
       tags:
         - sessions
@@ -54,13 +54,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionResponse'
+                $ref: '#/components/schemas/sessionResponse'
           description: Success
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/errorResponse'
               example:
                 error: Error description here
           description: Bad request
@@ -105,17 +105,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/userAccount'
           description: Success
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                invalidToken:
+                  value:
+                    error: Invalid token
+                missingAuthorizationheader:
+                  value:
+                    error: Missing Authorization header
+          description: Missing token
         '404':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 accountNotFound:
                   value:
                     error: Account not found
+                userNotFound:
+                  value:
+                    error: User not found
           description: Account not found
         '500':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 serverError:
                   value:
@@ -127,12 +147,61 @@ paths:
       summary: Shows users account info
       description: Gets users account info
   /transactions:
+    get:
+      tags:
+        - transactions
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/successfulResponse'
+              examples:
+                transactionHistory:
+                  value:
+                    transactions:
+                      createdAt: '2020-11-10T10:19:25.777Z'
+                      status: completed
+                      _id: 5faa692e8d2a8d4e50953be0
+                      userId: 5f994c778d48d50ad41c9618
+                      amount: 100
+                      currency: EUR
+                      accountFrom: 65b238383569286925
+                      accountTo: f6b952926464422664
+                      explanation: test
+                      statusDetail: ''
+                      senderName: string
+                      __v: 0
+          description: Returns an array of user's transactions
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                invalidToken:
+                  value:
+                    error: Invalid token
+          description: Invalid token
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                noLoggedTransctions:
+                  value:
+                    error: You have no logged transactions
+          description: No logged transactions
+      security:
+        -
+          Authorize: []
     post:
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransactionRequest'
+              $ref: '#/components/schemas/transactionRequest'
             examples:
               createTransaction:
                 value:
@@ -147,6 +216,8 @@ paths:
         '201':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/successfulResponse'
               examples:
                 successfulTransaction:
                   value:
@@ -155,16 +226,31 @@ paths:
         '400':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 invalidAmount:
                   value:
                     error: Invalid amount
+                invalidAccountTo:
+                  value:
+                    error: Invalid accountTo
           description: Invalid amount
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+              examples:
+                missingAuthorizationHeader:
+                  value:
+                    error: Missing Authorization header
+          description: Missing token
         '402':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 insufficientFunds:
                   value:
@@ -173,6 +259,8 @@ paths:
         '403':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 forbidden:
                   value:
@@ -181,6 +269,8 @@ paths:
         '404':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 accountNotFound:
                   value:
@@ -199,6 +289,8 @@ paths:
         '400':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 parsingJWTFailed:
                   value:
@@ -207,6 +299,8 @@ paths:
         '404':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 accountNotFound:
                   value:
@@ -215,6 +309,8 @@ paths:
         '500':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 cannotVerifySignature:
                   value:
@@ -223,6 +319,8 @@ paths:
         '502':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
               examples:
                 centralBankError:
                   value:
@@ -236,6 +334,8 @@ paths:
         '200':
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/keys'
               examples:
                 keys:
                   value:
@@ -249,73 +349,6 @@ paths:
           description: Responds with a JWKS key
 components:
   schemas:
-    SessionRequest:
-      required:
-        - password
-        - username
-      type: object
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-      example:
-        username: user1
-        password: test
-    SessionResponse:
-      required:
-        - user
-      type: object
-      properties:
-        token:
-          type: string
-      example:
-        token: 5f9820e487dae20838fb4b13
-    ErrorResponse:
-      required:
-        - error
-      type: object
-      properties:
-        error:
-          type: string
-    User:
-      required:
-        - name
-        - username
-        - password
-      type: object
-      properties:
-        name:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-    UserRegistered:
-      required:
-        - _id
-        - name
-        - username
-        - password
-        - token
-      type: object
-      properties:
-        _id:
-          type: string
-        name:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-        token:
-          type: string
-      example:
-        user:
-          _id: '23'
-          username: user1
-          token: 9f8e22760d6a96881f9450ce4fb82e27
-          name: Bob
     bodyType:
       title: Root Type for bodyType
       description: ''
@@ -350,7 +383,58 @@ components:
             account_number: EE2798567388301682
             balance: 20000
             currency: EUR
-    TransactionRequest:
+    invalidToken:
+      title: Root Type for invalidToken
+      description: ''
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: Invalid token
+    successfulResponse:
+      description: ''
+      required:
+        - successful
+        - successfulHistory
+      type: object
+      properties:
+        successful:
+          description: Successful response
+          type: string
+        successfulHistory:
+          description: "{\r\n  \"transactions\": {\r\n    \"createdAt\": \"2020-11-10T10:19:25.777Z\",\r\n    \"status\": \"completed\",\r\n    \"_id\": \"5faa692e8d2a8d4e50953be0\",\r\n    \"userId\": \"5f994c778d48d50ad41c9618\",\r\n    \"amount\": 100,\r\n    \"currency\": \"EUR\",\r\n    \"accountFrom\": \"65b238383569286925\",\r\n    \"accountTo\": \"f6b952926464422664\",\r\n    \"explanation\": \"test\",\r\n    \"statusDetail\": \"\",\r\n    \"senderName\": \"string\",\r\n    \"__v\": 0\r\n  }\r\n}"
+          type: string
+    errorResponse:
+      required:
+        - error
+      type: object
+      properties:
+        error:
+          type: string
+    sessionRequest:
+      required:
+        - password
+        - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: user1
+        password: test
+    sessionResponse:
+      required:
+        - user
+      type: object
+      properties:
+        token:
+          type: string
+      example:
+        token: 5f9820e487dae20838fb4b13
+    transactionRequest:
       title: Root Type for TransactionRequest
       description: ''
       type: object
@@ -369,6 +453,70 @@ components:
         accountTo: EE2798567388301682
         amount: 100
         explanation: test
+    user:
+      required:
+        - name
+        - username
+        - password
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    userRegistered:
+      required:
+        - _id
+        - name
+        - username
+        - password
+        - token
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        token:
+          type: string
+      example:
+        user:
+          _id: '23'
+          username: user1
+          token: 9f8e22760d6a96881f9450ce4fb82e27
+          name: Bob
+    keys:
+      title: keys
+      description: ''
+      type: object
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            properties:
+              kty:
+                type: string
+              kid:
+                type: string
+              'n':
+                type: string
+              e:
+                type: string
+      example:
+        keys:
+          -
+            kty: RSA
+            kid: uzDlPavO-uyJwXO5sHYA7sVeZ6dXHEYI2-AcHi2tTfA
+            'n': >-
+              Uw3RoZP869toe9VHfyIdjYue4n59mq3hxY7MjqLl3LjVZyPPDcTMlIxjE4NucYH7snTYVImLoERJgMX_YpT2SwmAhlS2LqrMysKW6QjYedirdYCK7zERWLxLVjCfZEcqQIY8rP1o3_-4FDHROOV_jnhNBRU2wtZZUtyQTTokV78
+            e: AQAB
   responses:
     UnauthorizedError:
       content:
