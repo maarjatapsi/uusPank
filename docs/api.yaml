@@ -1,0 +1,328 @@
+openapi: 3.0.2
+info:
+  title: M & O bank
+  version: 1.0.0
+  description: Bank api
+  contact:
+    email: maarja.tapsi@khk.ee
+servers:
+  -
+    url: 'http://localhost:3000'
+  -
+    url: 'http://petstore.swagger.io/v2'
+paths:
+  /users:
+    post:
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      tags:
+        - users
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistered'
+          description: Success
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Error description here
+          description: Bad request
+      operationId: createUser
+      summary: Create user
+      description: Creates a new user
+  /sessions:
+    post:
+      requestBody:
+        description: User credentials used for log in
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionRequest'
+        required: true
+      tags:
+        - sessions
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+          description: Success
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Error description here
+          description: Bad request
+      operationId: login
+      summary: Creates a user session (log in)
+    delete:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bodyType'
+        required: true
+      tags:
+        - sessions
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                tokenDeleted:
+                  value:
+                    message: Token successfully deleted
+          description: Session deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      security:
+        -
+          Authorize: []
+      summary: Deletes a user session (log out)
+  /users/account:
+    get:
+      requestBody:
+        content:
+          application/json: {}
+        required: false
+      tags:
+        - users
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userAccount'
+          description: Success
+        '404':
+          content:
+            application/json:
+              examples:
+                accountNotFound:
+                  value:
+                    error: Account not found
+          description: Account not found
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    error: Error description here
+          description: Server Error
+      security:
+        -
+          Authorize: []
+      summary: Shows users account info
+      description: Gets users account info
+  /transactions:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+            examples:
+              createTransaction:
+                value:
+                  accountFrom: EE2860832851762801
+                  accountTo: EE2798567388301682
+                  amount: 100
+                  explanation: test
+        required: true
+      tags:
+        - transactions
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                successfulTransaction:
+                  value:
+                    message: Transaction created successfully
+          description: Transaction created successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidAmount:
+                  value:
+                    error: Invalid amount
+          description: Invalid amount
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '402':
+          content:
+            application/json:
+              examples:
+                insufficientFunds:
+                  value:
+                    error: Insufficient funds
+          description: Insufficent funds
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+          description: The accountFrom does not belong to the user
+        '404':
+          content:
+            application/json:
+              examples:
+                accountNotFound:
+                  value:
+                    error: Account not found
+          description: Account not found
+      security:
+        -
+          Authorize: []
+components:
+  schemas:
+    SessionRequest:
+      required:
+        - password
+        - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: user1
+        password: test
+    SessionResponse:
+      required:
+        - user
+      type: object
+      properties:
+        token:
+          type: string
+      example:
+        token: 5f9820e487dae20838fb4b13
+    ErrorResponse:
+      required:
+        - error
+      type: object
+      properties:
+        error:
+          type: string
+    User:
+      required:
+        - name
+        - username
+        - password
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    UserRegistered:
+      required:
+        - _id
+        - name
+        - username
+        - password
+        - token
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        token:
+          type: string
+      example:
+        user:
+          _id: '23'
+          username: user1
+          token: 9f8e22760d6a96881f9450ce4fb82e27
+          name: Bob
+    bodyType:
+      title: Root Type for bodyType
+      description: ''
+      type: object
+      example: {}
+    userAccount:
+      title: Root Type for userAccount
+      description: ''
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        account:
+          type: array
+          items:
+            type: object
+            properties:
+              account_number:
+                type: string
+              balance:
+                format: int32
+                type: integer
+              currency:
+                type: string
+      example:
+        name: string
+        username: user1
+        account:
+          -
+            account_number: EE2798567388301682
+            balance: 20000
+            currency: EUR
+    TransactionRequest:
+      title: Root Type for TransactionRequest
+      description: ''
+      type: object
+      properties:
+        accountFrom:
+          type: string
+        accountTo:
+          type: string
+        amount:
+          format: int32
+          type: integer
+        explanation:
+          type: string
+      example:
+        accountFrom: EE2860832851762801
+        accountTo: EE2798567388301682
+        amount: 100
+        explanation: test
+  responses:
+    UnauthorizedError:
+      content:
+        application/json:
+          examples:
+            Unauthorized:
+              value:
+                error: Error description here
+      description: Access token is missing or invalid
+  securitySchemes:
+    Authorize:
+      scheme: bearer
+      type: http

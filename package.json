@@ -1,0 +1,40 @@
+{
+  "name": "pank3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maarjatapsi/uusPank.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maarjatapsi/uusPank/issues"
+  },
+  "homepage": "https://github.com/maarjatapsi/uusPank#readme",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.10",
+    "mongoose-unique-validator": "^2.0.3",
+    "node-fetch": "^2.6.1",
+    "node-jose": "^2.0.0",
+    "nodemon": "^2.0.6",
+    "swagger-ui-express": "^4.1.4",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "abort-controller": "^3.0.0",
+    "express-validator": "^6.6.1",
+    "nock": "^13.0.4"
+  }
+}

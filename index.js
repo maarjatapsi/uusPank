@@ -2,9 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./docs/swagger.json');
 const dotenv = require('dotenv');
 const { RequestHeadersHaveCorrectContentType, RequestBodyIsValidJson } = require('./middlewares')
+const yaml = require('yamljs');
+const swaggerDocument = yaml.load('./docs/api.yaml');
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //Import Routes
 const usersRoute = require('./routes/users');
 const sessionsRoute = require('./routes/sessions');
+const transactionsRoute = require('./routes/transactions');
 
 //routes
 app.get('/', (req, res) => {
@@ -38,7 +40,7 @@ app.get('/', (req, res) => {
 });
 app.use('/users', usersRoute);
 app.use('/sessions', sessionsRoute);
-
+app.use('/transactions', transactionsRoute);
 
 // Listening to the server
 app.listen(port, () => {
