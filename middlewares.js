@@ -29,7 +29,7 @@ exports.RequestHeadersHaveCorrectContentType = (req, res, next) => {
     next();
 }
 
-exports.verifyToken = async(req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
 
     // Check Authorization header is provided
     let authorizationHeader = req.header('Authorization')
@@ -58,7 +58,7 @@ exports.verifyToken = async(req, res, next) => {
     return next(); // Pass the request to the next middleware
 }
 
-exports.processTransactions = async() => {
+exports.processTransactions = async () => {
     let serverResponseAsJson, serverResponseAsPlainText, serverResponseAsObject, timeout, bankTo, transactionExpiryTime
 
     // Init jose keystore
@@ -169,6 +169,23 @@ exports.processTransactions = async() => {
             }, 1000)
 
             // Actually send the request
+
+            const nock = require('nock')
+            let nockScope
+
+            if (process.env.TEST_MODE === 'true') {
+
+                const nockUrl = new URL(bankTo.transactionUrl)
+
+                console.log('Nocking ' + JSON.stringify(nockUrl));
+
+                nockScope = nock(`${nockUrl.protocol}//${nockUrl.host}`)
+                    .persist()
+                    .post(nockUrl.pathname)
+                    .reply(200, { receiverName: 'foobar' })
+
+            }
+
             serverResponseAsObject = await fetch(bankTo.transactionUrl, {
                 signal: abortCtrl.signal,
                 method: 'POST',
@@ -242,7 +259,7 @@ exports.processTransactions = async() => {
     setTimeout(exports.processTransactions, 1000)
 }
 
-exports.refreshBanksFromCentralBank = async() => {
+exports.refreshBanksFromCentralBank = async () => {
 
     try {
         console.log('Refreshing banks');
