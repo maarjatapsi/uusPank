@@ -45,8 +45,10 @@ router.post('/', verifyToken, async(req, res, next) => {
     let banks = [],
         statusDetail
     const loggedUserAccount = await accountModel.findOne({ accountNumber: req.body.accountFrom});
-    console.log("User balance.. " + loggedUserAccount.balance);
-    console.log("Req account " + req.body.accountFrom);
+    console.log(loggedUserAccount);
+    if (!loggedUserAccount) {
+        return res.status(404).json({ error: 'Account not found' })
+    }
     // Check for sufficient funds
     if (req.body.amount > loggedUserAccount.balance) {
         return res.status(402).json({ error: 'Insufficient funds' });
