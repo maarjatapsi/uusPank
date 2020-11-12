@@ -1,22 +1,13 @@
 const mongoose = require("mongoose");
 require('dotenv').config();
 
-function generate(n) {
-    var add = 1, max = 12 - add;
-
-    if ( n > max ) {
-        return generate(max) + generate(n - max);
-    }
-    max  = Math.pow(10, n+add);
-    var min  = max/10;
-    var number = Math.floor( Math.random() * (max - min + 1) ) + min;
-    return ("" + number).substring(add);
-}
 
 const AccountSchema = mongoose.Schema({
     account_number: {
         type: String,
-        default: process.env.BANK_PREFIX + generate(15)
+        default: function () {
+            return process.env.BANK_PREFIX + require('md5')(new Date().toISOString())
+        }
     },
     balance: {
         type: Number,

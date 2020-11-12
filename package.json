@@ -35,6 +35,7 @@
   "devDependencies": {
     "abort-controller": "^3.0.0",
     "express-validator": "^6.6.1",
+    "md5": "^2.3.0",
     "nock": "^13.0.4"
   }
 }
