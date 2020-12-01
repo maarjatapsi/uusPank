@@ -45,7 +45,7 @@ router.get('/account', verifyToken, async (req, res) => {
             res.status(404).json({error: "User not found"})
         }
 
-        const userAccount = await Account.findOne({user: session.userId}).select({ "account_number": 1, "balance": 1, "currency": 1, "user": 1, "_id": 0 });
+        const userAccount = await Account.findOne({user: session.userId}).select({ "accountNumber": 1, "balance": 1, "currency": 1, "user": 1, "_id": 0 });
 
         if (!userAccount) {
             res.status(404).json({error: "Account not found"})
@@ -55,7 +55,7 @@ router.get('/account', verifyToken, async (req, res) => {
             name: user.name,
             username: user.username,
             account: [{
-                account_number: userAccount.account_number,
+                accountNumber: userAccount.accountNumber,
                 balance: userAccount.balance,
                 currency: userAccount.currency
             }]

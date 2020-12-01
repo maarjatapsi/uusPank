@@ -3,7 +3,7 @@ require('dotenv').config();
 
 
 const AccountSchema = mongoose.Schema({
-    account_number: {
+    accountNumber: {
         type: String,
         default: function () {
             return process.env.BANK_PREFIX + require('md5')(new Date().toISOString())
