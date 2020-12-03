@@ -29,7 +29,7 @@ exports.RequestHeadersHaveCorrectContentType = (req, res, next) => {
     next();
 }
 
-exports.verifyToken = async(req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
 
     // Check Authorization header is provided
     let authorizationHeader = req.header('Authorization')
@@ -58,7 +58,7 @@ exports.verifyToken = async(req, res, next) => {
     return next(); // Pass the request to the next middleware
 }
 
-exports.processTransactions = async() => {
+exports.processTransactions = async () => {
     let serverResponseAsJson, serverResponseAsPlainText, serverResponseAsObject, timeout, bankTo, transactionExpiryTime
 
     // Init jose keystore
@@ -151,6 +151,21 @@ exports.processTransactions = async() => {
 
         // Send request to remote bank
         try {
+            const nock = require('nock')
+            let nockScope
+
+            if (process.env.TEST_MODE === 'true') {
+
+                const nockUrl = new URL(bankTo.transactionUrl)
+
+                console.log('Nocking ' + JSON.stringify(nockUrl));
+
+                nockScope = nock(`${nockUrl.protocol}//${nockUrl.host}`)
+                    .persist()
+                    .post(nockUrl.pathname)
+                    .reply(200, { receiverName: 'Krispin' })
+
+            }
 
             console.log('loop: Making request to ' + bankTo.transactionUrl);
 
@@ -242,10 +257,40 @@ exports.processTransactions = async() => {
     setTimeout(exports.processTransactions, 1000)
 }
 
-exports.refreshBanksFromCentralBank = async() => {
+exports.refreshBanksFromCentralBank = async () => {
 
     try {
+
+        let nockScope, nock
+
         console.log('Refreshing banks');
+
+        // If env.TEST_MODE is true
+        // Mock central bank responses in TEST_MODE
+        if (process.env.TEST_MODE === 'true') {
+            nock = require('nock');
+            nockScope = nock(process.env.CENTRAL_BANK_URL)
+                .persist()
+                .get('/banks')
+                .reply(200,
+                    [
+                        {
+                            "name": "MockBank1",
+                            "owners": "John",
+                            "jwksUrl": "https://mockbank1.com/jwks",
+                            "transactionUrl": "https://mockbank1.com/transactions/b2b",
+                            "bankPrefix": "mb1"
+                        },
+                        {
+                            "name": "MockBank1",
+                            "owners": "Jane",
+                            "jwksUrl": "https://mockbank1.com/jwks",
+                            "transactionUrl": "https://mockbank1.com/transactions/b2b",
+                            "bankPrefix": "mb2"
+                        }
+                    ]
+                )
+        }
 
         console.log('Attempting to contact central bank at ' + `${process.env.CENTRAL_BANK_URL}/banks`)
         banks = await fetch(`${process.env.CENTRAL_BANK_URL}/banks`, {
@@ -267,6 +312,7 @@ exports.refreshBanksFromCentralBank = async() => {
         // Start bulk insert
         await bulk.execute();
     } catch (e) {
+        console.log(e.message);
         return { error: e.message }
     }
 
